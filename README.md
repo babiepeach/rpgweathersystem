@@ -5,9 +5,12 @@ Easily adaptable for changes with randomness and weather length.
 
 ## Features
 
-Currently, only two weather types avaliable:
+Currently, only two weather types avaliable within the code:
  - Rain
  - Sun
+
+It should be possible to add more weather patterns or events, like Snow or Hail.
+There is also a detailed guide within the 'script.rpy' file detailing each line of code, what it does, and how it is used.
 
 ## Installation Guide
 
