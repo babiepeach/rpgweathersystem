@@ -6,10 +6,10 @@ Easily adaptable for changes with randomness and weather length.
 ## Features
 
 + Weather types:
- - Rain
- - Sun
- - Snow
- - Cloudy
+  - Rain
+  - Sun
+  - Snow
+  - Cloudy
 + Weather length
 + Weather GUI + Weather Forecast
 + Dynamically updating Weather GUI between Regions
