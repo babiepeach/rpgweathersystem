@@ -1,7 +1,7 @@
 ﻿
 default isRaining = False
 ## This, when False, indicates Sunny weather, the default.
-## This, when True, indictaes Rainy weather.
+## This, when True, indicates Rainy weather.
 
 default rainTime = 100
 ## This is the length of the weather.
@@ -11,13 +11,35 @@ default sinceRain = 0
 ## This tells us if Rain has occured recently.
 ## Usually, it can be a boolean (True/False), however I find it easier to use integers (Whole Numbers).
 
+default isSnowing = False
+## If False, it is not snowing.
+## If True, it is snowing.
+
+default areaIsCold = False
+## If False, the area is not Cold, which doesn't allow snow.
+## If True, the area is Cold, which allowes snow.
+## This is not strictly necessary, but it helps with the Weather GUI + Weather Forecast.
+
+default snowTime = 100
+## This is the length of the weather.
+## Can be made longer or shorter by default, but can be extended at any point by adding to it.
+
+default sinceSnow = 0
+## This tells us if Snow has occured recently.
+
 #######################################################################
 
 label start:
 
+    show screen weatherGUI
+
     menu:
         "Travel":
             jump travelWeather
+        "Travel Cold Area":
+            jump travelCold
+        "Check the weather":
+            jump weatherForecast
 
     return
 
@@ -28,6 +50,11 @@ label start:
 #######################################################################
 
 label travelWeather:
+
+    $ areaIsCold = False
+
+## This labels this area as warm, since the Boolean is set to False. This is mainly for the Weather GUI and
+## nothing in-game.
 
 #######################################################################
 
@@ -67,7 +94,7 @@ label travelWeather:
 
             $ rainChance = renpy.random.randint(1,25)
 
-            if rainChance == 13 and sinceRain == 0:
+            if rainChance == 13 or 12 or 11 or 10 and sinceRain == 0:
 
                 $ isRaining = True
                 $ rainTime = 100
@@ -142,9 +169,153 @@ label travelWeather:
 
             else:
                 "You arrived. The weather is Sunny but it is Raining, which is impossible."
-    return
+    jump start #return
 
 ## This can only occur if it is Raining and there is no chance of rain, indicating Sunny weather.
-## This is impossible to occur.
+## This is impossible to occur. However, if you do somehow see it, something has gone horribly wrong.
 ## [return] just sends you back to the main menu. This can be a [jump] clause, or anything else.
 ## This just indicates the end of the weather forecast.
+
+#######################################################################
+###########################  WEATHER: SNOW  ###########################
+#######################################################################
+
+## Here is a full code block for a weather pattern to help you grasp it easier, as it may be confusing too see the
+## comments + code within the rain pattern. There will be no more comments in this section. However,
+## [$ areaIsCold = True] only helps with the Weather GUI at the bottom of the page. This whole code block is the same
+## as the rain block, just not broken up and added one value.
+
+label travelCold:
+
+    $ areaIsCold = True
+
+    if isSnowing:
+
+        $ snowTime -= 10
+
+        "You arrived safely, but it seems to be snowing."
+        "Movement and Agility have been decreased heavily."
+
+        if snowTime == 0:
+
+            $ sinceSnow += 1
+            $ isSnowing = False
+            $ snowTime = 100
+
+            "However, just as soon as you arrived, it stopped snowing."
+            "Movement and Agility no longer impacted."
+
+    else:
+
+        if not isSnowing and sinceSnow == 0:
+
+            $ snowChance = renpy.random.randint(1,25)
+
+            if snowChance == 13 or 12 or 11 or 10 and sinceSnow == 0:
+
+                $ isSnowing = True
+                $ snowTime = 100
+
+                "Just as you arrived, it began to snow."
+                "You should've felt the oncoming cold, but hey."
+                "Movement and Agility have been decreased heavily."
+
+            elif sinceSnow == 0:
+
+                "You arrived. The weather seems nice, but cold. There do seem to be some oncoming clouds, however."
+                "It doesn't look like it should snow anytime soon."
+
+            else:
+                "The weather seems to be great! No oncoming clouds."
+        
+        else:
+            if sinceSnow == 1:
+
+                $ allowSnow = renpy.random.randint(1,10)
+
+                if allowSnow == 9:
+
+                    $ sinceSnow = 0
+
+                    "You arrived. The weather seems nice. There do seem to be some clouds rolling in, however."
+
+                else:
+                    "The weather seems to be great! No oncoming clouds."
+            
+            else:
+                "You arrived. The weather is XXX but it is XXX, which is impossible."
+
+jump start
+
+#######################################################################
+#############################  FORECAST  ##############################
+#######################################################################
+
+## This forecast only works for Rain, not Snow, however you can always adapt it to work with Snow, I just haven't done
+## that as the Weather GUI does a better job at this anyway. This is just mainly a cute thing you could add to a T.V.
+## in your game, or something.
+
+label weatherForecast:
+
+    if isRaining == 1:
+        "It is raining."
+        if rainTime >= 50:
+            "It doesn't look like it'll be stopping any time soon."
+        else:
+            "But, it should stop soon."
+    elif sinceRain == 0:
+        "There may be rain today."
+    else:
+        "It seems sunny, with no clouds today!"
+
+jump start
+
+#######################################################################
+###########################  WEATHER: GUI  ############################
+#######################################################################
+
+## This works with screens. If you don't already know the basics of them, I highly recommend you touch up on them using
+## the screens tutorial on https://www.lezcave.com , which is made by one of our dearest moderators over on the RenPy
+## Discord server, where you can also get help from there, too. This will have significantly less comments, as it is
+## easier to grasp than what has been done previously.
+
+screen weatherGUI():
+
+    frame:
+
+        vbox:
+            xalign 0.0
+            yalign 0.0
+            spacing 10
+            ## Appears in top left corner.
+
+            label _("Current Weather:"):
+                xalign 0.5
+
+            if isRaining == 1 and isSnowing == 1: ## A certain case if it is snowing and raining, does not show heavy
+                text _("Raining | Snowing") ## or light rain/snow.
+            elif isRaining == 1: ## Checks for rain. Priority weather.
+                if rainTime >= 50: ## More than 50 rainTime left.
+                    text _("Heavy Rain")
+                else:
+                    text _("Light Rain")
+            elif isSnowing and areaIsCold: ## If it is cold and is snowing.
+                if snowTime >= 50: ## More than 50 snowTime left.
+                    text _("Blizzard + Cold")
+                else:
+                    text _("Light Snow + Cold")
+            elif areaIsCold and sinceSnow == 0: ## If it is cold and can snow.
+                text _("Cloudy + Cold")
+            elif areaIsCold and sinceSnow == 1: ## If it is cold and can not snow.
+                text _("Sunny + Cold")
+            elif sinceRain == 0: ## If it is not cold and can rain.
+                text _("Cloudy")
+            else: ## If it is not cold and can not rain.
+                text _("Sunny")
+            ## Dynamically changing, can be mainly used for debug if you don't want this in your game. It changes between
+            ## regions, too, so if it is sunny in one region and a blizzard in another, it stores that state and displays
+            ## the correct one when in that region.
+
+            # text "[isRaining] [sinceRain] [rainTime] | [areaIsCold] | [isSnowing] [sinceSnow] [snowTime]"
+            ## For Debug, shows Values. Updates with the Values. [allowRain] and [allowSnow] can be added, you must travel
+            ## to each region first before adding them, as if not it crashes the game.
